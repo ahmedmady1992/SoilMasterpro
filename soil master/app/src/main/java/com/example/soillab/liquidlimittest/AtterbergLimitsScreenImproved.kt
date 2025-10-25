@@ -25,20 +25,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.soillab.R
 import com.example.soillab.data.*
 import com.example.soillab.ui.components.*
+import com.example.soillab.ui.theme.Green500
+import com.example.soillab.ui.theme.Yellow500
 import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.components.LimitLine
-import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.components.LimitLine
+import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
+import com.github.mikephil.charting.formatter.ValueFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -297,15 +299,12 @@ fun AtterbergLimitsScreenImproved(
 
             ActionButtons(onCompute = viewModel::computeResults, onLoadExample = { viewModel.loadExampleData(context) })
 
-            AnimatedVisibility(
-                visible = uiState.calculationResult != null,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically()
-            ) {
-                uiState.calculationResult?.let { ResultDashboard(it) }
-            }
-
-            AnimatedVisibility(visible = uiState.calculationResult == null && !uiState.isLoading) {
+            // Replaced .let with if (result != null) to fix invocation error
+            if (uiState.calculationResult != null) {
+                Column {
+                    ResultDashboard(uiState.calculationResult!!)
+                }
+            } else if (!uiState.isLoading) {
                 InfoPanel(stringResource(R.string.info_awaiting_data_atterberg))
             }
 
@@ -565,4 +564,3 @@ class LogAxisValueFormatter : com.github.mikephil.charting.formatter.ValueFormat
         return "%.0f".format(value)
     }
 }
-
